@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌟 英単語クイズ 700語</title>
+<link rel="manifest" href="#"/>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="英単語クイズ">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  background: #fff8f0;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 10% 20%, #FFD93D33 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, #4ECDC433 0%, transparent 50%);
+}
+#root { display: flex; flex-direction: column; align-items: center; padding: 16px; min-height: 100vh; }
+h1 { font-size: clamp(1.2rem,5vw,1.9rem); font-weight: 900; text-align: center; margin-bottom: 4px; color: #2d2d2d; margin-top: 8px; }
+h1 span { color: #FF6B6B; }
+.subtitle { color: #aaa; font-size: 0.8rem; margin-bottom: 16px; text-align: center; }
+
+/* Category grid */
+.cat-grid { width: 100%; max-width: 520px; }
+.cat-grid-label { text-align: center; font-weight: 700; color: #888; margin-bottom: 14px; font-size: 0.9rem; }
+.cat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cat-btn {
+background: #fff; border: 2.5px solid #f0e8d8; border-radius: 16px;
+padding: 12px 10px; cursor: pointer; font-family: inherit; text-align: left;
+box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.15s, box-shadow 0.15s;
+-webkit-appearance: none;
+}
+.cat-btn:active { transform: translateY(2px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.cat-emoji { font-size: 1.5rem; margin-bottom: 4px; }
+.cat-name { font-weight: 900; font-size: 0.78rem; color: #2d2d2d; line-height: 1.3; }
+.cat-count { font-size: 0.7rem; color: #bbb; margin-top: 3px; }
+
+/* Progress */
+.progress-wrap { width: 100%; max-width: 460px; margin-bottom: 12px; }
+.progress-top { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #888; margin-bottom: 5px; }
+.progress-num { font-size: 0.78rem; color: #bbb; margin-bottom: 5px; }
+.progress-bar { height: 10px; background: #f0e8d8; border-radius: 99px; overflow: hidden; border: 2px solid #e0d8cc; }
+.progress-fill { height: 100%; background: linear-gradient(90deg,#FFD93D,#FF6B6B); border-radius: 99px; transition: width 0.5s; }
+
+/* Stars */
+.stars-row { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; max-width: 460px; }
+.star-item { font-size: 1rem; }
+
+/* Card */
+.card {
+background: #fff; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+padding: 28px 24px 24px; max-width: 460px; width: 100%; text-align: center;
+border: 3px solid transparent; transition: border-color 0.3s;
+}
+.card.correct { border-color: #6BCB77; }
+.card.wrong { border-color: #FF6B6B; }
+.card-badge { display: inline-block; background: #A78BFA; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 3px 12px; border-radius: 99px; margin-bottom: 16px; }
+.card-num { font-size: 0.78rem; color: #ccc; font-weight: 700; margin-bottom: 6px; }
+.card-word { font-size: clamp(1.8rem,9vw,3rem); font-weight: 900; color: #2d2d2d; letter-spacing: -1px; margin-bottom: 6px; line-height: 1; }
+.card-hint { font-size: 0.78rem; color: #ccc; font-style: italic; margin-bottom: 20px; }
+
+/* Buttons */
+.btn-speak {
+background: linear-gradient(135deg,#A78BFA,#7c3aed); color: #fff; border: none;
+border-radius: 14px; padding: 9px 20px; font-size: 0.88rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 4px 0 #5b21b6;
+margin-bottom: 10px; display: inline-flex; align-items: center; gap: 6px;
+-webkit-appearance: none;
+}
+.btn-reveal {
+background: linear-gradient(135deg,#4ECDC4,#38b2ac); color: #fff; border: none;
+border-radius: 14px; padding: 13px 32px; font-size: 0.95rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 5px 0 #2a9d8f;
+-webkit-appearance: none;
+}
+.answer-area { animation: slideUp 0.3s ease; }
+.answer-label { font-size: 0.72rem; color: #bbb; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+.answer-word { font-size: clamp(1.4rem,6vw,2.2rem); font-weight: 900; color: #FF6B6B; margin-bottom: 18px; }
+.judge-row { display: flex; gap: 10px; justify-content: center; }
+.btn-correct {
+flex: 1; max-width: 140px; background: #6BCB77; color: #fff; border: none;
+border-radius: 12px; padding: 11px 0; font-size: 0.88rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 4px 0 #4a9d5a; -webkit-appearance: none;
+}
+.btn-wrong {
+flex: 1; max-width: 140px; background: #FF6B6B; color: #fff; border: none;
+border-radius: 12px; padding: 11px 0; font-size: 0.88rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 4px 0 #c0392b; -webkit-appearance: none;
+}
+
+/* Result */
+.result-card {
+background: #fff; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+padding: 36px 24px; max-width: 460px; width: 100%; text-align: center;
+animation: slideUp 0.5s ease;
+}
+.result-emoji { font-size: 3.5rem; margin-bottom: 10px; }
+.result-title { font-size: 1.5rem; font-weight: 900; color: #2d2d2d; margin-bottom: 6px; }
+.result-score { font-size: 0.95rem; color: #888; margin-bottom: 24px; }
+.result-score span { font-size: 2.2rem; font-weight: 900; color: #FF6B6B; }
+.missed-title { font-size: 0.72rem; font-weight: 700; color: #bbb; letter-spacing: 1px; margin-bottom: 8px; text-align: left; }
+.missed-item {
+display: flex; justify-content: space-between; background: #fff5f5;
+border-radius: 10px; padding: 7px 12px; margin-bottom: 5px; font-weight: 700; font-size: 0.85rem;
+}
+.missed-en { color: #2d2d2d; }
+.missed-ja { color: #FF6B6B; }
+.result-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+.btn-retry {
+background: linear-gradient(135deg,#4ECDC4,#38b2ac); color: #fff; border: none;
+border-radius: 14px; padding: 13px 28px; font-size: 0.95rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 5px 0 #2a9d8f; -webkit-appearance: none;
+}
+.btn-back {
+background: linear-gradient(135deg,#FFD93D,#FF6B6B); color: #fff; border: none;
+border-radius: 14px; padding: 13px 28px; font-size: 0.95rem; font-weight: 900;
+cursor: pointer; font-family: inherit; box-shadow: 0 5px 0 #c0392b; -webkit-appearance: none;
+}
+
+/* Confetti */
+.conf {
+position: fixed; border-radius: 2px; pointer-events: none; z-index: 999;
+animation: fall linear forwards;
+}
+
+/* Animations */
+@keyframes fall { from{transform:translateY(-20px) rotate(0deg);opacity:1} to{transform:translateY(105vh) rotate(720deg);opacity:0} }
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes popIn { 0%{transform:scale(0) rotate(-20deg)} 60%{transform:scale(1.3) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+@keyframes pulse { from{transform:scale(1)} to{transform:scale(1.06)} }
+.speaking { animation: pulse 0.5s ease infinite alternate; }
+.popped { animation: popIn 0.4s ease; }
+.fadein { animation: fadeIn 0.4s ease; }
+</style>
+
+</head>
+<body>
+<div id="root">
+  <h1>🌟 英単語<span>クイズ</span> 🌟</h1>
+  <p class="subtitle">小学校700語 英検5級相当</p>
+  <div id="app"></div>
+</div>
+
+<script>
+const categories = [
+  { id:"jikan", name:"年・月・日・時・行事", emoji:"📅", words:[
+    {en:"year",ja:"年"},{en:"month",ja:"月"},{en:"week",ja:"週"},{en:"day",ja:"日"},
+    {en:"today",ja:"今日"},{en:"tomorrow",ja:"明日"},{en:"date",ja:"日付"},
+    {en:"time",ja:"時こく"},{en:"hour",ja:"1時間"},{en:"minute",ja:"分"},
+    {en:"morning",ja:"朝"},{en:"noon",ja:"正午"},{en:"afternoon",ja:"午後"},
+    {en:"evening",ja:"晩"},{en:"night",ja:"夜"},{en:"a.m.",ja:"午前"},
+    {en:"p.m.",ja:"午後"},{en:"weekend",ja:"週末"},{en:"New Year's Day",ja:"元日"},
+    {en:"Dolls' Festival",ja:"ひなまつり"},{en:"Children's Day",ja:"こどもの日"},
+    {en:"Christmas",ja:"クリスマス"},{en:"New Year's Eve",ja:"大みそか"},
+    {en:"vacation",ja:"休み"},{en:"birthday",ja:"誕生日"},
+    {en:"present",ja:"プレゼント"},{en:"party",ja:"パーティー"},
+  ]},
+  { id:"youbi", name:"曜日・季節・月の名前", emoji:"🗓️", words:[
+    {en:"Monday",ja:"月曜日"},{en:"Tuesday",ja:"火曜日"},{en:"Wednesday",ja:"水曜日"},
+    {en:"Thursday",ja:"木曜日"},{en:"Friday",ja:"金曜日"},{en:"Saturday",ja:"土曜日"},
+    {en:"Sunday",ja:"日曜日"},{en:"spring",ja:"春"},{en:"summer",ja:"夏"},
+    {en:"autumn",ja:"秋"},{en:"fall",ja:"秋・落ちる"},{en:"winter",ja:"冬"},
+    {en:"January",ja:"1月"},{en:"February",ja:"2月"},{en:"March",ja:"3月"},
+    {en:"April",ja:"4月"},{en:"May",ja:"5月"},{en:"June",ja:"6月"},
+    {en:"July",ja:"7月"},{en:"August",ja:"8月"},{en:"September",ja:"9月"},
+    {en:"October",ja:"10月"},{en:"November",ja:"11月"},{en:"December",ja:"12月"},
+  ]},
+  { id:"kazu", name:"数", emoji:"🔢", words:[
+    {en:"one",ja:"1"},{en:"two",ja:"2"},{en:"three",ja:"3"},{en:"four",ja:"4"},
+    {en:"five",ja:"5"},{en:"six",ja:"6"},{en:"seven",ja:"7"},{en:"eight",ja:"8"},
+    {en:"nine",ja:"9"},{en:"ten",ja:"10"},{en:"eleven",ja:"11"},{en:"twelve",ja:"12"},
+    {en:"thirteen",ja:"13"},{en:"fourteen",ja:"14"},{en:"fifteen",ja:"15"},
+    {en:"sixteen",ja:"16"},{en:"seventeen",ja:"17"},{en:"eighteen",ja:"18"},
+    {en:"nineteen",ja:"19"},{en:"twenty",ja:"20"},{en:"thirty",ja:"30"},
+    {en:"forty",ja:"40"},{en:"fifty",ja:"50"},{en:"sixty",ja:"60"},
+    {en:"seventy",ja:"70"},{en:"eighty",ja:"80"},{en:"ninety",ja:"90"},
+    {en:"hundred",ja:"100"},{en:"thousand",ja:"1000"},{en:"zero",ja:"0"},
+  ]},
+  { id:"josuu", name:"日付・序数", emoji:"📆", words:[
+    {en:"first",ja:"1日・1番目"},{en:"second",ja:"2日・2番目"},{en:"third",ja:"3日・3番目"},
+    {en:"fourth",ja:"4日・4番目"},{en:"fifth",ja:"5日・5番目"},{en:"sixth",ja:"6日・6番目"},
+    {en:"seventh",ja:"7日・7番目"},{en:"eighth",ja:"8日・8番目"},{en:"ninth",ja:"9日・9番目"},
+    {en:"tenth",ja:"10日・10番目"},{en:"eleventh",ja:"11日"},{en:"twelfth",ja:"12日"},
+    {en:"thirteenth",ja:"13日"},{en:"fourteenth",ja:"14日"},{en:"fifteenth",ja:"15日"},
+    {en:"sixteenth",ja:"16日"},{en:"seventeenth",ja:"17日"},{en:"eighteenth",ja:"18日"},
+    {en:"nineteenth",ja:"19日"},{en:"twentieth",ja:"20日"},{en:"twenty-first",ja:"21日"},
+    {en:"twenty-second",ja:"22日"},{en:"twenty-third",ja:"23日"},{en:"twenty-fourth",ja:"24日"},
+    {en:"twenty-fifth",ja:"25日"},{en:"thirtieth",ja:"30日"},{en:"thirty-first",ja:"31日"},
+  ]},
+  { id:"tabemono", name:"食事・食べ物", emoji:"🍱", words:[
+    {en:"breakfast",ja:"朝ご飯"},{en:"lunch",ja:"昼ご飯"},{en:"snack",ja:"おやつ"},
+    {en:"dinner",ja:"晩ご飯"},{en:"meal",ja:"食事"},{en:"food",ja:"食べ物"},
+    {en:"hamburger",ja:"ハンバーガー"},{en:"pizza",ja:"ピザ"},{en:"spaghetti",ja:"スパゲッティ"},
+    {en:"steak",ja:"ステーキ"},{en:"salad",ja:"サラダ"},{en:"noodle",ja:"麺類"},
+    {en:"egg",ja:"卵"},{en:"rice ball",ja:"おにぎり"},{en:"soup",ja:"スープ"},
+    {en:"pie",ja:"パイ"},{en:"sandwich",ja:"サンドイッチ"},{en:"sausage",ja:"ソーセージ"},
+    {en:"omelet",ja:"オムレツ"},{en:"curry",ja:"カレー"},{en:"rice",ja:"米・ご飯"},
+    {en:"bread",ja:"パン"},{en:"meat",ja:"肉"},
+  ]},
+  { id:"yasai", name:"野菜・果物", emoji:"🥦", words:[
+    {en:"vegetable",ja:"野菜"},{en:"cucumber",ja:"きゅうり"},{en:"carrot",ja:"にんじん"},
+    {en:"lettuce",ja:"レタス"},{en:"cabbage",ja:"キャベツ"},{en:"corn",ja:"とうもろこし"},
+    {en:"radish",ja:"ラディッシュ"},{en:"broccoli",ja:"ブロッコリ"},{en:"pumpkin",ja:"かぼちゃ"},
+    {en:"tomato",ja:"トマト"},{en:"onion",ja:"玉ねぎ"},{en:"potato",ja:"じゃがいも"},
+    {en:"mushroom",ja:"マッシュルーム"},{en:"fruit",ja:"果物"},{en:"apple",ja:"りんご"},
+    {en:"strawberry",ja:"いちご"},{en:"grapes",ja:"ぶどう"},{en:"pineapple",ja:"パイナップル"},
+    {en:"peach",ja:"もも"},{en:"melon",ja:"メロン"},{en:"banana",ja:"バナナ"},
+    {en:"kiwi fruit",ja:"キウィ"},{en:"lemon",ja:"レモン"},{en:"cherry",ja:"さくらんぼ"},
+    {en:"watermelon",ja:"すいか"},
+  ]},
+  { id:"dezato", name:"デザート・飲み物・食器", emoji:"🍰", words:[
+    {en:"dessert",ja:"デザート"},{en:"ice cream",ja:"アイスクリーム"},{en:"pudding",ja:"プリン"},
+    {en:"parfait",ja:"パフェ"},{en:"cake",ja:"ケーキ"},{en:"donut",ja:"ドーナツ"},
+    {en:"candy",ja:"キャンディ"},{en:"chocolate",ja:"チョコレート"},{en:"jam",ja:"ジャム"},
+    {en:"yogurt",ja:"ヨーグルト"},{en:"water",ja:"水"},{en:"milk",ja:"牛乳"},
+    {en:"juice",ja:"ジュース"},{en:"coffee",ja:"コーヒー"},{en:"tea",ja:"紅茶・茶"},
+    {en:"green tea",ja:"緑茶"},{en:"plate",ja:"皿（取り皿）"},{en:"dish",ja:"皿（大皿）"},
+    {en:"chopsticks",ja:"はし"},{en:"spoon",ja:"スプーン"},{en:"fork",ja:"フォーク"},
+    {en:"glass",ja:"コップ"},{en:"cup",ja:"カップ"},
+  ]},
+  { id:"dobutsu", name:"動物・生きもの", emoji:"🐘", words:[
+    {en:"animal",ja:"動物"},{en:"dog",ja:"犬"},{en:"cat",ja:"ネコ"},{en:"panda",ja:"パンダ"},
+    {en:"mouse",ja:"ネズミ"},{en:"bear",ja:"熊"},{en:"elephant",ja:"象"},{en:"horse",ja:"馬"},
+    {en:"cow",ja:"牛"},{en:"tiger",ja:"トラ"},{en:"sheep",ja:"羊"},{en:"chicken",ja:"ニワトリ"},
+    {en:"gorilla",ja:"ゴリラ"},{en:"monkey",ja:"サル"},{en:"pig",ja:"ブタ"},
+    {en:"rabbit",ja:"ウサギ"},{en:"goat",ja:"ヤギ"},{en:"lion",ja:"ライオン"},
+    {en:"fox",ja:"キツネ"},{en:"zebra",ja:"シマウマ"},{en:"wolf",ja:"オオカミ"},
+    {en:"koala",ja:"コアラ"},{en:"whale",ja:"クジラ"},{en:"dolphin",ja:"イルカ"},
+    {en:"bird",ja:"鳥"},{en:"snake",ja:"ヘビ"},{en:"fish",ja:"魚"},
+    {en:"spider",ja:"クモ"},{en:"ant",ja:"アリ"},{en:"dragon",ja:"ドラゴン・龍"},
+  ]},
+  { id:"iro", name:"色・形・単位", emoji:"🎨", words:[
+    {en:"color",ja:"色"},{en:"red",ja:"赤"},{en:"blue",ja:"青"},{en:"green",ja:"緑"},
+    {en:"yellow",ja:"黄色"},{en:"pink",ja:"ピンク"},{en:"black",ja:"黒"},{en:"white",ja:"白"},
+    {en:"orange",ja:"オレンジ色"},{en:"purple",ja:"むらさき色"},{en:"brown",ja:"茶色"},
+    {en:"circle",ja:"丸"},{en:"triangle",ja:"三角"},{en:"cross",ja:"十字形・×印"},
+    {en:"heart",ja:"ハート・心臓"},{en:"square",ja:"四角"},{en:"star",ja:"星"},
+    {en:"diamond",ja:"ひし形・ダイヤモンド"},{en:"line",ja:"線"},{en:"dollar",ja:"ドル"},
+    {en:"yen",ja:"円"},{en:"meter",ja:"メートル"},{en:"centimeter",ja:"センチメートル"},
+    {en:"kilogram",ja:"キログラム"},
+  ]},
+  { id:"sport", name:"スポーツ・活動", emoji:"⚽", words:[
+    {en:"sport",ja:"スポーツ"},{en:"soccer",ja:"サッカー"},{en:"baseball",ja:"野球"},
+    {en:"basketball",ja:"バスケットボール"},{en:"swimming",ja:"水泳"},{en:"volleyball",ja:"バレーボール"},
+    {en:"table tennis",ja:"卓球"},{en:"badminton",ja:"バドミントン"},{en:"football",ja:"フットボール"},
+    {en:"tennis",ja:"テニス"},{en:"dodgeball",ja:"ドッジボール"},{en:"ball",ja:"ボール"},
+    {en:"racket",ja:"ラケット"},{en:"bat",ja:"バット"},{en:"jumprope",ja:"なわとびのなわ"},
+    {en:"bicycle",ja:"自転車"},{en:"bike",ja:"自転車"},{en:"club",ja:"クラブ"},
+    {en:"team",ja:"チーム"},{en:"member",ja:"メンバー"},{en:"fishing",ja:"魚つり"},
+    {en:"dancing",ja:"ダンス"},{en:"jogging",ja:"ジョギング"},{en:"cooking",ja:"料理"},
+    {en:"reading",ja:"読書"},{en:"shopping",ja:"買い物"},{en:"walking",ja:"ウォーキング・散歩"},
+    {en:"hiking",ja:"ハイキング"},{en:"camping",ja:"キャンプ"},{en:"running",ja:"ランニング"},
+  ]},
+  { id:"shizen", name:"遊び・自然", emoji:"🌈", words:[
+    {en:"tag",ja:"おにごっこ"},{en:"bingo",ja:"ビンゴ"},{en:"game",ja:"ゲーム・試合"},
+    {en:"card",ja:"カード・トランプ"},{en:"king",ja:"キング・王"},{en:"queen",ja:"クイーン・女王"},
+    {en:"balloon",ja:"風船"},{en:"hint",ja:"ヒント"},{en:"dice",ja:"サイコロ"},
+    {en:"yo-yo",ja:"ヨーヨー"},{en:"toy",ja:"おもちゃ"},{en:"firework",ja:"花火"},
+    {en:"nature",ja:"自然"},{en:"sky",ja:"空"},{en:"sun",ja:"太陽"},
+    {en:"moon",ja:"月"},{en:"rainbow",ja:"にじ"},{en:"flower",ja:"花"},
+    {en:"tree",ja:"木"},{en:"mountain",ja:"山"},{en:"lake",ja:"湖"},
+    {en:"river",ja:"川"},{en:"sea",ja:"海"},{en:"beach",ja:"海岸"},
+    {en:"jungle",ja:"ジャングル"},{en:"weather",ja:"天気"},{en:"snow",ja:"雪"},{en:"rain",ja:"雨"},
+  ]},
+  { id:"karada", name:"からだ・身につけるもの", emoji:"👕", words:[
+    {en:"head",ja:"頭"},{en:"eyes",ja:"目"},{en:"ears",ja:"耳"},{en:"nose",ja:"鼻"},
+    {en:"mouth",ja:"口"},{en:"teeth",ja:"歯"},{en:"shoulders",ja:"肩"},{en:"knees",ja:"ひざ"},
+    {en:"toes",ja:"つま先"},{en:"hand",ja:"手"},{en:"leg",ja:"足"},{en:"T-shirt",ja:"Tシャツ"},
+    {en:"shirt",ja:"シャツ"},{en:"shorts",ja:"半ズボン"},{en:"sweater",ja:"セーター"},
+    {en:"pants",ja:"ズボン"},{en:"cap",ja:"帽子（野球帽）"},{en:"hat",ja:"帽子（縁あり）"},
+    {en:"shoes",ja:"くつ"},{en:"boots",ja:"長ぐつ・ブーツ"},{en:"glasses",ja:"めがね"},
+    {en:"bag",ja:"かばん・バッグ"},{en:"umbrella",ja:"かさ"},
+  ]},
+  { id:"ie", name:"家の中のもの", emoji:"🏠", words:[
+    {en:"house",ja:"家"},{en:"home",ja:"家・家庭"},{en:"door",ja:"ドア"},{en:"window",ja:"窓"},
+    {en:"wall",ja:"壁"},{en:"room",ja:"部屋"},{en:"table",ja:"テーブル"},{en:"desk",ja:"机"},
+    {en:"chair",ja:"いす"},{en:"mat",ja:"マット"},{en:"picture",ja:"絵・写真"},{en:"TV",ja:"テレビ"},
+    {en:"bath",ja:"ふろ"},{en:"bed",ja:"ベッド"},{en:"clock",ja:"時計"},
+    {en:"calendar",ja:"カレンダー"},{en:"book",ja:"本"},{en:"watch",ja:"うで時計"},
+    {en:"box",ja:"箱"},{en:"telephone",ja:"電話機"},{en:"basket",ja:"かご"},
+    {en:"computer",ja:"コンピューター"},{en:"newspaper",ja:"新聞"},
+    {en:"garbage",ja:"ごみ"},{en:"piggy bank",ja:"ブタの形の貯金箱"},
+  ]},
+  { id:"bunbougu", name:"文房具・楽器", emoji:"🎵", words:[
+    {en:"pencil",ja:"えんぴつ"},{en:"eraser",ja:"消しゴム"},{en:"ruler",ja:"定規"},
+    {en:"crayon",ja:"クレヨン"},{en:"glue stick",ja:"スティックのり"},{en:"scissors",ja:"はさみ"},
+    {en:"pen",ja:"ペン"},{en:"stapler",ja:"ホッチキス"},{en:"magnet",ja:"磁石・マグネット"},
+    {en:"marker",ja:"マーカー・マジックペン"},{en:"pencil sharpener",ja:"えんぴつけずり"},
+    {en:"pencil case",ja:"筆箱"},{en:"notebook",ja:"ノート"},{en:"chalk",ja:"チョーク"},
+    {en:"ink",ja:"インク"},{en:"map",ja:"地図"},{en:"drum",ja:"たいこ・ドラム"},
+    {en:"violin",ja:"バイオリン"},{en:"recorder",ja:"リコーダー"},{en:"piano",ja:"ピアノ"},
+    {en:"flute",ja:"フルート"},{en:"guitar",ja:"ギター"},
+  ]},
+  { id:"gakkou", name:"学校", emoji:"🏫", words:[
+    {en:"school",ja:"学校"},{en:"classroom",ja:"教室"},{en:"class",ja:"クラス"},
+    {en:"playground",ja:"運動場・遊び場"},{en:"gym",ja:"体育館"},{en:"library",ja:"図書室・図書館"},
+    {en:"pool",ja:"プール"},{en:"name",ja:"名前"},{en:"teacher",ja:"先生"},
+    {en:"student",ja:"生徒"},{en:"subject",ja:"教科"},{en:"Japanese",ja:"国語・日本語"},
+    {en:"English",ja:"英語"},{en:"math",ja:"算数・数学"},{en:"science",ja:"理科・科学"},
+    {en:"social studies",ja:"社会"},{en:"music",ja:"音楽"},{en:"arts and crafts",ja:"図工"},
+    {en:"P.E.",ja:"体育"},{en:"alphabet",ja:"アルファベット"},{en:"calligraphy",ja:"習字・書道"},
+    {en:"textbook",ja:"教科書"},{en:"test",ja:"テスト"},{en:"homework",ja:"宿題"},
+    {en:"letter",ja:"手紙・文字"},
+  ]},
+  { id:"basho", name:"場所・建物・乗り物", emoji:"🚌", words:[
+    {en:"place",ja:"場所"},{en:"city",ja:"都市・市"},{en:"town",ja:"市・町"},{en:"shop",ja:"店"},
+    {en:"garden",ja:"庭"},{en:"bookstore",ja:"本屋"},{en:"gas station",ja:"ガソリンスタンド"},
+    {en:"police station",ja:"警察署"},{en:"post office",ja:"郵便局"},{en:"hospital",ja:"病院"},
+    {en:"supermarket",ja:"スーパーマーケット"},{en:"restaurant",ja:"レストラン"},
+    {en:"amusement park",ja:"遊園地"},{en:"aquarium",ja:"水族館"},{en:"castle",ja:"城"},
+    {en:"park",ja:"公園"},{en:"stadium",ja:"競技場・スタジアム"},{en:"zoo",ja:"動物園"},
+    {en:"station",ja:"駅"},{en:"street",ja:"通り"},{en:"car",ja:"自動車"},
+    {en:"bus",ja:"バス"},{en:"taxi",ja:"タクシー"},{en:"train",ja:"電車・列車"},
+    {en:"ship",ja:"船"},{en:"plane",ja:"飛行機"},{en:"corner",ja:"交差点・かど"},
+    {en:"block",ja:"ブロック・一区画"},
+  ]},
+  { id:"hito", name:"人・職業", emoji:"👨‍👩‍👧", words:[
+    {en:"family",ja:"家族"},{en:"father",ja:"父"},{en:"mother",ja:"母"},
+    {en:"sister",ja:"姉・妹"},{en:"brother",ja:"兄・弟"},{en:"son",ja:"息子"},
+    {en:"daughter",ja:"娘"},{en:"aunt",ja:"おば"},{en:"uncle",ja:"おじ"},
+    {en:"grandfather",ja:"祖父"},{en:"grandmother",ja:"祖母"},{en:"child",ja:"子"},
+    {en:"friend",ja:"友達"},{en:"man",ja:"男の人"},{en:"woman",ja:"女の人"},
+    {en:"boy",ja:"男の子"},{en:"girl",ja:"女の子"},{en:"people",ja:"人々"},
+    {en:"baseball player",ja:"野球選手"},{en:"doctor",ja:"医者"},
+    {en:"fire fighter",ja:"消防士"},{en:"police officer",ja:"警察官"},
+    {en:"artist",ja:"芸術家"},{en:"astronaut",ja:"宇宙飛行士"},{en:"baker",ja:"パン職人"},
+    {en:"bus driver",ja:"バスの運転手"},{en:"farmer",ja:"農場主・農夫"},
+    {en:"pianist",ja:"ピアニスト"},{en:"pilot",ja:"パイロット"},{en:"singer",ja:"歌手"},
+  ]},
+  { id:"kuni", name:"世界の国", emoji:"🌍", words:[
+    {en:"world",ja:"世界"},{en:"America",ja:"アメリカ合衆国"},{en:"Australia",ja:"オーストラリア"},
+    {en:"Belgium",ja:"ベルギー"},{en:"Brazil",ja:"ブラジル"},{en:"Canada",ja:"カナダ"},
+    {en:"China",ja:"中国"},{en:"Egypt",ja:"エジプト"},{en:"Finland",ja:"フィンランド"},
+    {en:"France",ja:"フランス"},{en:"Germany",ja:"ドイツ"},{en:"India",ja:"インド"},
+    {en:"Ireland",ja:"アイルランド"},{en:"Italy",ja:"イタリア"},{en:"Japan",ja:"日本"},
+    {en:"Korea",ja:"韓国"},{en:"Peru",ja:"ペルー"},{en:"Russia",ja:"ロシア"},
+    {en:"Spain",ja:"スペイン"},{en:"Thailand",ja:"タイ"},{en:"the UK",ja:"英国"},
+    {en:"Malaysia",ja:"マレーシア"},{en:"Norway",ja:"ノルウェー"},{en:"Turkey",ja:"トルコ"},
+    {en:"Vietnam",ja:"ベトナム"},
+  ]},
+  { id:"yousu", name:"様子を表す言葉", emoji:"✨", words:[
+    {en:"big",ja:"大きい"},{en:"small",ja:"小さい"},{en:"long",ja:"長い"},{en:"short",ja:"短い"},
+    {en:"new",ja:"新しい"},{en:"old",ja:"古い"},{en:"soft",ja:"やわらかい"},{en:"hard",ja:"かたい"},
+    {en:"slow",ja:"おそい"},{en:"fast",ja:"速い"},{en:"shiny",ja:"光る"},{en:"scary",ja:"こわい"},
+    {en:"round",ja:"丸い"},{en:"beautiful",ja:"美しい"},{en:"nice",ja:"素敵な・親切な"},
+    {en:"high",ja:"高い"},{en:"busy",ja:"いそがしい"},{en:"special",ja:"特別な"},
+    {en:"fantastic",ja:"素晴らしい"},{en:"last",ja:"最後の"},{en:"great",ja:"偉大な"},
+    {en:"wonderful",ja:"素晴らしい"},{en:"famous",ja:"有名な"},{en:"best",ja:"最高の"},
+    {en:"main",ja:"主な"},{en:"fun",ja:"楽しい"},{en:"exciting",ja:"興奮させる"},
+    {en:"favorite",ja:"好きな"},{en:"all",ja:"全部の"},{en:"many",ja:"多くの（数えられる）"},
+    {en:"much",ja:"多くの（数えられない）"},
+  ]},
+  { id:"kibun", name:"気分・気持ち・性格・味・天気", emoji:"😊", words:[
+    {en:"good",ja:"良い"},{en:"bad",ja:"悪い"},{en:"fine",ja:"元気な"},{en:"happy",ja:"幸せな"},
+    {en:"sad",ja:"悲しい"},{en:"sleepy",ja:"ねむい"},{en:"hungry",ja:"空腹な"},
+    {en:"tired",ja:"つかれた"},{en:"friendly",ja:"親しみのある"},{en:"kind",ja:"思いやりのある"},
+    {en:"brave",ja:"勇かんな"},{en:"funny",ja:"おもしろい"},{en:"strong",ja:"強い"},
+    {en:"bitter",ja:"苦い"},{en:"sour",ja:"すっぱい"},{en:"salty",ja:"塩からい"},
+    {en:"sweet",ja:"あまい"},{en:"delicious",ja:"おいしい"},{en:"yummy",ja:"おいしい"},
+    {en:"fresh",ja:"新鮮な"},{en:"sunny",ja:"晴れた"},{en:"rainy",ja:"雨の降る"},
+    {en:"cloudy",ja:"曇りの"},{en:"snowy",ja:"雪の降る"},{en:"hot",ja:"暑い・熱い"},
+    {en:"cold",ja:"寒い・冷たい"},{en:"cool",ja:"涼しい・冷えた"},{en:"warm",ja:"あたたかい"},
+  ]},
+  { id:"daimeishi", name:"私は・あなたの など", emoji:"👤", words:[
+    {en:"I",ja:"私は"},{en:"my",ja:"私の"},{en:"me",ja:"私を（に）"},{en:"mine",ja:"私のもの"},
+    {en:"you",ja:"あなたは"},{en:"your",ja:"あなたの"},{en:"yours",ja:"あなたのもの"},
+    {en:"he",ja:"彼は"},{en:"his",ja:"彼の"},{en:"him",ja:"彼を（に）"},
+    {en:"she",ja:"彼女は"},{en:"her",ja:"彼女の"},{en:"hers",ja:"彼女のもの"},
+    {en:"we",ja:"私たちは"},{en:"our",ja:"私たちの"},{en:"us",ja:"私たちを（に）"},
+    {en:"ours",ja:"私たちのもの"},{en:"they",ja:"彼（女）らは"},{en:"their",ja:"彼（女）らの"},
+    {en:"them",ja:"彼（女）らを（に）"},{en:"theirs",ja:"彼（女）らのもの"},
+    {en:"it",ja:"それは"},{en:"its",ja:"それの"},{en:"everyone",ja:"みんな"},
+    {en:"one",ja:"（任意の）人"},
+  ]},
+  { id:"doushi", name:"be動詞・一般動詞①", emoji:"🏃", words:[
+    {en:"am",ja:"〜である・いる（I）"},{en:"are",ja:"〜である・いる（you）"},
+    {en:"is",ja:"〜である・いる（he/she）"},{en:"be",ja:"〜になる・〜である"},
+    {en:"do",ja:"する（I/you/we）"},{en:"does",ja:"する（he/she）"},
+    {en:"have",ja:"持っている"},{en:"go",ja:"行く"},{en:"come",ja:"来る"},{en:"sit",ja:"すわる"},
+    {en:"stand",ja:"立つ"},{en:"walk",ja:"歩く"},{en:"run",ja:"走る"},
+    {en:"start",ja:"始まる・始める"},{en:"stop",ja:"止まる・止める"},
+    {en:"jump",ja:"とぶ・はねる"},{en:"turn",ja:"回る・向きを変える"},
+    {en:"look",ja:"見る"},{en:"watch",ja:"見る"},{en:"see",ja:"見る・見える"},
+    {en:"listen",ja:"聞く"},{en:"speak",ja:"話す"},{en:"talk",ja:"話す"},
+    {en:"eat",ja:"食べる"},{en:"drink",ja:"飲む"},{en:"wash",ja:"洗う"},
+    {en:"brush",ja:"ブラシをかける・みがく"},{en:"sleep",ja:"ねむる"},
+    {en:"want",ja:"ほしい・ほしがる"},{en:"live",ja:"住む・生きる"},
+  ]},
+  { id:"doushi2", name:"一般動詞②③", emoji:"✋", words:[
+    {en:"cook",ja:"料理する"},{en:"make",ja:"作る"},{en:"clean",ja:"そうじする"},
+    {en:"study",ja:"勉強する"},{en:"read",ja:"読む"},{en:"write",ja:"書く"},
+    {en:"think",ja:"考える"},{en:"know",ja:"知る"},{en:"cut",ja:"切る"},
+    {en:"try",ja:"やってみる・試みる"},{en:"check",ja:"調べる・確認する"},
+    {en:"work",ja:"働く"},{en:"teach",ja:"教える"},{en:"swim",ja:"泳ぐ"},
+    {en:"sing",ja:"歌う"},{en:"ski",ja:"スキーをする"},{en:"skate",ja:"スケートをする"},
+    {en:"ride",ja:"乗る"},{en:"dance",ja:"おどる"},{en:"practice",ja:"練習する"},
+    {en:"fly",ja:"飛ぶ"},{en:"find",ja:"見つける"},{en:"put",ja:"置く"},
+    {en:"touch",ja:"さわる"},{en:"buy",ja:"買う"},{en:"get",ja:"手にいれる"},
+    {en:"use",ja:"使う"},{en:"open",ja:"開ける"},{en:"close",ja:"閉める"},
+    {en:"take",ja:"とる・持っていく"},
+  ]},
+  { id:"doushi3", name:"一般動詞③・これ・あれ など", emoji:"❓", words:[
+    {en:"visit",ja:"おとずれる"},{en:"meet",ja:"会う"},{en:"join",ja:"参加する"},
+    {en:"leave",ja:"出発する・離れる"},{en:"call",ja:"呼ぶ"},{en:"enjoy",ja:"楽しむ"},
+    {en:"like",ja:"好む"},{en:"love",ja:"愛する"},{en:"play",ja:"遊ぶ"},{en:"help",ja:"助ける"},
+    {en:"this",ja:"これ"},{en:"that",ja:"あれ・それ"},{en:"these",ja:"これら"},
+    {en:"those",ja:"あれら・それら"},{en:"everything",ja:"何もかも・すべて"},
+    {en:"what",ja:"何・どんな"},{en:"who",ja:"だれ"},{en:"why",ja:"なぜ"},
+    {en:"how",ja:"どうやって"},{en:"when",ja:"いつ"},{en:"where",ja:"どこで・どこに"},
+    {en:"whose",ja:"だれの"},{en:"which",ja:"どの・どれ"},
+    {en:"a",ja:"1つの・1人の"},{en:"the",ja:"その・あの"},
+  ]},
+  { id:"fukushi", name:"副詞など", emoji:"💬", words:[
+    {en:"again",ja:"もう一度"},{en:"not",ja:"〜でない"},{en:"yes",ja:"はい"},
+    {en:"no",ja:"いいえ"},{en:"too",ja:"〜もまた・〜すぎる"},{en:"very",ja:"とても"},
+    {en:"always",ja:"いつも"},{en:"usually",ja:"ふつう"},{en:"sometimes",ja:"時々"},
+    {en:"never",ja:"決して〜ない"},{en:"later",ja:"あとで"},{en:"away",ja:"向こうに"},
+    {en:"well",ja:"うまく"},{en:"often",ja:"たびたび"},{en:"now",ja:"今"},
+    {en:"here",ja:"ここに・ここで"},{en:"there",ja:"そこに・そこで"},
+    {en:"o'clock",ja:"〜時"},{en:"out",ja:"外に・外へ"},{en:"up",ja:"上に・上へ"},
+    {en:"down",ja:"下に・下へ"},{en:"really",ja:"本当に"},{en:"just",ja:"丁度・ほんの"},
+    {en:"only",ja:"たった・〜だけ"},{en:"around",ja:"〜ころ・およそ"},
+    {en:"also",ja:"〜もまた"},{en:"then",ja:"その時・それから"},
+    {en:"together",ja:"いっしょに"},{en:"left",ja:"左に・左へ"},
+    {en:"right",ja:"右に・右へ"},{en:"straight",ja:"まっすぐに"},
+  ]},
+  { id:"zenchishi", name:"前置詞・接続詞・助動詞など", emoji:"📌", words:[
+    {en:"for",ja:"〜のために"},{en:"about",ja:"〜について"},{en:"to",ja:"〜へ・〜まで"},
+    {en:"at",ja:"〜に"},{en:"in",ja:"〜の中に・〜に"},{en:"under",ja:"〜の下に"},
+    {en:"by",ja:"〜のそばに"},{en:"from",ja:"〜から・〜出身で"},
+    {en:"outside",ja:"〜の外に"},{en:"inside",ja:"〜の中に"},{en:"on",ja:"〜の上に"},
+    {en:"with",ja:"〜といっしょに"},{en:"of",ja:"〜の"},{en:"after",ja:"〜の後に"},
+    {en:"before",ja:"〜の前に"},{en:"near",ja:"〜のそばに"},
+    {en:"and",ja:"〜と〜・そして"},{en:"or",ja:"〜か〜・または"},
+    {en:"but",ja:"しかし"},{en:"so",ja:"だから"},{en:"can",ja:"〜することができる"},
+    {en:"Mr.",ja:"〜さん・〜先生（男性）"},{en:"Ms.",ja:"〜さん・〜先生（女性）"},
+  ]},
+];
+
+// ===== State =====
+let screen = "select";
+let selectedCat = null;
+let questions = [];
+let current = 0;
+let revealed = false;
+let stars = [];
+let missed = [];
+let cardState = "";
+
+const Q_COUNT = 15;
+const COLORS = ["#FF6B6B","#FFD93D","#4ECDC4","#A78BFA","#6BCB77","#FF8FAB","#60a5fa"];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function speak(text, lang) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate = 0.85; u.pitch = 1.1;
+  window.speechSynthesis.speak(u);
+}
+
+function launchConfetti() {
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'conf';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.top = '-20px';
+    c.style.width = (8+Math.random()*8)+'px';
+    c.style.height = (8+Math.random()*8)+'px';
+    c.style.background = COLORS[Math.floor(Math.random()*COLORS.length)];
+    c.style.animationDuration = (1.5+Math.random()*2)+'s';
+    c.style.animationDelay = Math.random()+'s';
+    document.body.appendChild(c);
+    c.addEventListener('animationend', () => c.remove());
+  }
+}
+
+// ===== Render =====
+function render() {
+  const app = document.getElementById('app');
+
+  if (screen === "select") {
+    app.innerHTML = `
+      <div class="cat-grid fadein">
+        <p class="cat-grid-label">カテゴリーを選んでね！（各15問）</p>
+        <div class="cat-list">
+          ${categories.map(cat => `
+            <button class="cat-btn" onclick="startQuiz('${cat.id}')">
+              <div class="cat-emoji">${cat.emoji}</div>
+              <div class="cat-name">${cat.name}</div>
+              <div class="cat-count">${cat.words.length}語</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (screen === "quiz") {
+    const q = questions[current];
+    const total = questions.length;
+    const score = stars.filter(s => s === "⭐").length;
+    const pct = (current / total) * 100;
+
+    app.innerHTML = `
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span>${selectedCat.emoji} ${selectedCat.name}</span>
+          <span>⭐ ${score}点</span>
+        </div>
+        <div class="progress-num">${current+1} / ${total}問</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stars-row">
+        ${stars.map((s,i) => `<span class="star-item ${s?'popped':''}">${s||'⬜'}</span>`).join('')}
+      </div>
+      <div class="card ${cardState}" id="quizCard">
+        <div class="card-badge">${selectedCat.name}</div>
+        <div class="card-num">問題 ${current+1}</div>
+        <div class="card-word">${q.en}</div>
+        <div class="card-hint">↑ この英単語の意味は？</div>
+        <button class="btn-speak" id="btnSpeak" onclick="speakEN()">🔊 もう一度きく</button><br>
+        ${!revealed ? `
+          <button class="btn-reveal" onclick="revealAnswer()">💡 こたえを見る</button>
+        ` : `
+          <div class="answer-area">
+            <div class="answer-label">こたえ</div>
+            <div class="answer-word">${q.ja}</div>
+            <div class="judge-row">
+              <button class="btn-correct" onclick="judge(true)">⭕ あってた！</button>
+              <button class="btn-wrong" onclick="judge(false)">❌ まちがえた</button>
+            </div>
+          </div>
+        `}
+      </div>`;
+    return;
+  }
+
+  if (screen === "result") {
+    const total = questions.length;
+    const score = stars.filter(s => s === "⭐").length;
+    const pct = score / total;
+    const emoji = pct===1?"🏆":pct>=0.8?"🎉":pct>=0.6?"😊":"💪";
+    const title = pct===1?"パーフェクト！すごい！":pct>=0.8?"すばらしい！":pct>=0.6?"よくできました！":"もう一度チャレンジ！";
+
+    app.innerHTML = `
+      <div class="result-card">
+        <div class="result-emoji">${emoji}</div>
+        <div class="result-title">${title}</div>
+        <div class="result-score"><span>${score}</span> / ${total}問 せいかい！</div>
+        ${missed.length > 0 ? `
+          <div class="missed-title">まちがえた単語</div>
+          ${missed.map(w => `
+            <div class="missed-item">
+              <span class="missed-en">${w.en}</span>
+              <span class="missed-ja">${w.ja}</span>
+            </div>`).join('')}
+        ` : ''}
+        <div class="result-btns">
+          <button class="btn-retry" onclick="startQuiz('${selectedCat.id}')">🔄 もう一度！</button>
+          <button class="btn-back" onclick="goSelect()">📚 カテゴリーへ</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ===== Actions =====
+function startQuiz(catId) {
+  selectedCat = categories.find(c => c.id === catId);
+  questions = shuffle(selectedCat.words).slice(0, Math.min(Q_COUNT, selectedCat.words.length));
+  current = 0; revealed = false; cardState = "";
+  stars = Array(questions.length).fill(null);
+  missed = [];
+  screen = "quiz";
+  render();
+  setTimeout(() => speak(questions[0].en, "en-US"), 500);
+}
+
+function speakEN() {
+  speak(questions[current].en, "en-US");
+  const btn = document.getElementById('btnSpeak');
+  if (btn) { btn.classList.add('speaking'); setTimeout(() => btn.classList.remove('speaking'), 1200); }
+}
+
+function revealAnswer() {
+  revealed = true;
+  render();
+  setTimeout(() => speak(questions[current].ja, "ja-JP"), 300);
+}
+
+function judge(correct) {
+  stars[current] = correct ? "⭐" : "❌";
+  if (!correct) missed.push(questions[current]);
+  cardState = correct ? "correct" : "wrong";
+  render();
+  setTimeout(() => {
+    const next = current + 1;
+    if (next < questions.length) {
+      current = next; revealed = false; cardState = "";
+      render();
+      setTimeout(() => speak(questions[current].en, "en-US"), 400);
+    } else {
+      const score = stars.filter(s => s === "⭐").length;
+      if (score >= Math.floor(questions.length * 0.8)) launchConfetti();
+      screen = "result";
+      render();
+    }
+  }, 600);
+}
+
+function goSelect() {
+  screen = "select";
+  render();
+}
+
+// Start
+render();
+</script>
+
+</body>
+</html>
